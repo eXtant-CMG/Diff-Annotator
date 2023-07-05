@@ -1,0 +1,146 @@
+<html>
+<head>
+  <title>Diff Annotator</title>
+<LINK rel="STYLESHEET" href="/assets/css/style.css" type="TEXT/CSS"/>
+
+    <script>
+async function loadDiffs() {
+  const response = await fetch('/api/diffs');
+  const diffs = await response.json();
+
+  diffs.sort((a, b) => {
+    const aParts = a.diffNr.split('.').map(Number);
+    const bParts = b.diffNr.split('.').map(Number);
+    for (let i = 0; i < Math.min(aParts.length, bParts.length); i++) {
+      if (aParts[i] !== bParts[i]) {
+        return aParts[i] - bParts[i];
+      }
+    }
+    return aParts.length - bParts.length;
+  });
+
+  let html = '';
+
+  let index = 1;
+  diffs.forEach(diff => {
+      html += `<tr data-diff="${diff.diffNr}"><td style="width:40px;color:#737373;">${index}.</td><td style="max-width:900px;"><a href="data/${diff.dirVar}/output.html">${diff.diffNr.replace(/_/g, ' ')}</a></td>`;
+      if (diff.status === 'corrected') {
+          html += `<td style="color: #75B1A9;">☑</td>`;
+      } else {
+          html += `<td></td>`;
+      }
+      html += `<td style="width:60px;"><span class="delete-icon">🗑️</span></td></tr>`;
+      index++;
+  });
+
+
+  document.querySelector('table').innerHTML = html;
+  
+  
+  document.querySelectorAll('.delete-icon').forEach(icon => {
+      icon.addEventListener('click', event => {
+          const row = event.target.closest('tr');
+          const diffNr = row.getAttribute('data-diff');
+          if (confirm(`Are you sure you want to delete ${diffNr}?`)) {
+              fetch(`/delete-diff/${diffNr}`, { method: 'DELETE' })
+                  .then(() => loadDiffs());
+          }
+      });
+  });
+
+}
+
+loadDiffs();
+
+
+    </script>
+  </head>
+<body>
+  <header><a style="color:inherit;" href="index.html">Diff Annotator</a></header>
+  <div class="container-main">
+  <div style="display:inline-block;width:400px"><button class="button" id="newDiff"><b>+</b> NEW DIFF</button></div> 
+  <div style="display:inline-block;width:600px;margin-left:120px;"><form action="/search"><label for="searchString">Search in diffs:</label> <input class="inputfields" style="width:350px;" type="text" id="searchString" name="searchString"/><button id="searchSubmit" type="submit">🔍</button></form></div>
+  <div id="formContainer" class="hidden">
+    <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+      <label for="diffName">Diff Name:</label>
+      <input class="inputfields" type="text" style="" id="diffName" name="diffName" required oninput="checkInput(this)"/>
+      <br />
+      <label for="file1">File 1:</label>
+      <input type="file" id="file1" name="files" accept=".txt" required />
+      <br />
+      <label for="file2">File 2:</label>
+      <input type="file" id="file2" name="files" accept=".txt" required />
+      <br /><br />
+      <input class="button" type="submit" value="Upload" />
+    </form>  
+  </div>
+  <div id="upload-response"></div>
+  <div style="margin-bottom: 10px;">Diffs:</div>
+  <table id="diff-list"></table>
+  </div>
+  <div id="footer">
+    <span>
+        Developed by Vincent Neyt as part of <a href="https://github.com/eXtant-CMG" target="_blank" style="color:inherit;text-decoration: underline;"><span class="bold">eXtant</span>, a toolkit for digital scholarly editing</a>.
+    </span>
+</div>
+<script>
+  document.querySelector('#newDiff').addEventListener('click', () => {
+    const formContainer = document.querySelector('#formContainer');
+    formContainer.classList.toggle('visible');
+  });
+
+  document.querySelector('#upload-form').addEventListener('submit', event => {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    
+    fetch('/upload', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.text())
+    .then(text => {
+      const formContainer = document.querySelector('#formContainer');
+      formContainer.classList.toggle('visible');
+      document.querySelector('#upload-response').innerHTML = text;
+      loadDiffs();
+    });
+  });
+
+  document.querySelector('#searchSubmit').addEventListener('click', () => {
+    const searchString = document.querySelector('#searchString').value;
+    fetch(`/search?searchString=${encodeURIComponent(searchString)}`);
+    setTimeout(() => {
+    window.location.href = '/search.html';
+  }, 1500);
+  });
+
+  // Select the #upload-response element
+  const uploadResponse = document.querySelector('#upload-response');
+
+  // Create a MutationObserver to observe changes to the #upload-response element
+  const observer = new MutationObserver(mutations => {
+    // Check if the innerHTML of the #upload-response element has changed
+    if (mutations.some(mutation => mutation.type === 'childList')) {
+      // Trigger the disappear animation
+      //uploadResponse.classList.add('disappear');
+      // Remove the disappear class after the animation completes
+      setTimeout(() => {
+        uploadResponse.innerHTML = '';
+        //uploadResponse.classList.remove('disappear');
+      }, 3000);
+    }
+  });
+
+  // Start observing changes to the #upload-response element
+  observer.observe(uploadResponse, { childList: true });
+
+  function checkInput(input) {
+    if (input.value.includes("'")) {
+      input.value = input.value.replace(/'/g, "");
+      alert("Apostrophes are not allowed in Diff Name");
+    }
+  }
+</script>
+</body>
+</html>

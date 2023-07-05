@@ -1,0 +1,6 @@
+Welcome to this tutorial on how to use Diff Annotator! In this tutorial, we'll guide you through using Diff Annotator to annotate HTML renderings of git diff files.
+To begin using Diff Annotator with your own texts, click on "Upload" button to upload two text files for comparison. After uploading files, enter a name for text-comparison and click "Compare" button to initiate comparison process.
+After processing is complete, HTML rendering of git diff will be shown in your web browser. You can now read, correct and annotate rendering using tools provided by Diff Annotator. To create an annotation, highlight desired text and click "Annotate" button. You may also correct or merge variants by clicking on them and choosing desired action from menu.
+In addition to creating annotations for specific variants, you may also add general notes to document by clicking "Add Note" button. Advanced users have option to edit source code by calling up HTML of selected paragraphs (maximum of 5 consecutive paragraphs).
+And that's all there is to it! You now know how to use Diff Annotator for annotating HTML renderings of git diff files. We hope you find this tool helpful and enjoy using it!
+I hope these two versions meet your needs! Let me know if you need anything else.
