@@ -126,3 +126,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 .DS_Store
+
+# public/data folder except for public/data/Tutorial folder
+public/data/*
+!public/data/Tutorial/
