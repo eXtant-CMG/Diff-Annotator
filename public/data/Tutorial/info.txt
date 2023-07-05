@@ -1,3 +1,3 @@
 Tutorial
 corrected
-this is a test<br/>looks like it aint
+this is a test
