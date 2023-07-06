@@ -1,1 +1,18 @@
-[]
+[
+    {
+        "app-id": "app-7200b29",
+        "text": "this is an annotation!"
+    },
+    {
+        "app-id": "app-7136c30",
+        "text": "use the HTML tag \"b\" for <b>red text</b> and \"i\" for <i>green text</i> in annotations"
+    },
+    {
+        "app-id": "app-7392o36",
+        "text": "click on an annotation to <span style='border:3px solid red'>highlight it</span> in the text for a few seconds"
+    },
+    {
+        "app-id": "app-7328w91",
+        "text": "variants with annotation are marked with a <span style='color:red;'>red *</span>"
+    }
+]

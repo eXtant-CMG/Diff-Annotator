@@ -1,3 +1,3 @@
 Tutorial
 corrected
-this is a test
+You can keep notes for the text-comparison here.<br/><br/>Changes you make in the notes window are auto-saved every 5 seconds.<br/><br/>Feel free to use <b>HTML tags</b> inside the notes. For instance, add a link to a specific paragraph like so: <a href="#pnr2">¶2</a>.
