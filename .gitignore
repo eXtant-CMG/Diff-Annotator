@@ -130,3 +130,6 @@ dist
 # public/data folder except for public/data/Tutorial folder
 public/data/*
 !public/data/Tutorial/
+
+#contents of uploads folder
+uploads/*

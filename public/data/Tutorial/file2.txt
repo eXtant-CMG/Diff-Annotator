@@ -1,6 +1,11 @@
-Welcome to this tutorial on how to use Diff Annotator! In this tutorial, we'll guide you through using Diff Annotator to annotate HTML renderings of git diff files.
-To begin using Diff Annotator with your own texts, click on "Upload" button to upload two text files for comparison. After uploading files, enter a name for text-comparison and click "Compare" button to initiate comparison process.
-After processing is complete, HTML rendering of git diff will be shown in your web browser. You can now read, correct and annotate rendering using tools provided by Diff Annotator. To create an annotation, highlight desired text and click "Annotate" button. You may also correct or merge variants by clicking on them and choosing desired action from menu.
-In addition to creating annotations for specific variants, you may also add general notes to document by clicking "Add Note" button. Advanced users have option to edit source code by calling up HTML of selected paragraphs (maximum of 5 consecutive paragraphs).
-And that's all there is to it! You now know how to use Diff Annotator for annotating HTML renderings of git diff files. We hope you find this tool helpful and enjoy using it!
-I hope these two versions meet your needs! Let me know if you need anything else.
+Welcome to this tutorial on how to use Diff Annotator! In this tutorial, we'll guide you through using Diff Annotator to annotate comparisons of two text files, and make corrections where needed.
+To begin using Diff Annotator with your own texts, click on the "+ DIFF" button  to upload two text files for comparison. Enter a name for the text-comparison and click  "Upload"  to initiate comparison process.
+After processing is complete, the text-comparison will come up in the list of diffs on the home page. You can now read, correct and annotate it using tools provided by Diff Annotator.
+To create an annotation, simply click on a variant (red or green text) and a pop-up window will open. Type it in the text field next to "Annotate:" and click "Submit".
+In addition to creating annotations for specific variants, you may also add general notes to the document by clicking on the "Edit" button in the NOTES tab on the right-hand side.
+You may also correct variants by clicking on them and changing the text fields marked 'f1' (the first text file) and 'f2' (the second text file). Click  "Update"  to save the change. Click on "Normalize to f2" to remove a variant and insert the variant from f2 into the text, or press the "Backspace" key to perform the same action.
+Advanced users have the option to edit the source code by calling up HTML of selected paragraphs.
+← Click on the paragraph number of the paragraph you would like to edit, and check the checkbox labeled "Edit:". Once one paragraph has been selected, a link "Edit Source Code" appears in the top navigation bar, on the right-hand side. You can select up to 5 consecutive paragraphs to edit simultaneously.
+All variants are contained in a <span class="app">, for instance: <span class="app" id="app-652"><span class="f1">Hello</span><span class="f2">Hi</span></span>. When you modify or create a new <span class="app">, make sure to give it a unique id so that annotations can be linked to it correctly.
+And that's all there is to it! You now know how to use Diff Annotator for annotating and correct text-comparisons.
+We hope you find this tool helpful and enjoy using it!

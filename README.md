@@ -1,6 +1,6 @@
 # Diff Annotator
 
-Diff Annotator is an environment for annotating HTML renderings of git diff files. Built with Node.js and Python, it allows users to upload two text files and give the text-comparison a name. After running the files through git diff (using a token-based comparison), [ansi2html.sh](https://github.com/pixelb/scripts/blob/master/scripts/ansi2html.sh), and a Python processing script, the Diff Annotator creates a HTML rendering that is ready to be read, corrected, and annotated, all in the front end.
+Diff Annotator is a lightweight environment for annotating text-comparisons of two plain text files. It makes use of Node.js, Python, and `git diff`. After running the text files through a pipeline of `git diff` (using a token-based comparison), [ansi2html.sh](https://github.com/pixelb/scripts/blob/master/scripts/ansi2html.sh), and a Python processing script, the Diff Annotator creates a HTML rendering that is ready to be read, corrected, and annotated, all in the front end.
 
 ## Features
 - Upload two text files for comparison
@@ -29,6 +29,6 @@ Diff Annotator is an environment for annotating HTML renderings of git diff file
 ## Usage
 1. Click "+ DIFF" to upload two text files for comparison.
 2. Give the text-comparison a name.
-3. After processing, the HTML rendering will be ready to be read, corrected, and annotated in the front end.
+3. After processing, the text-comparison can be accessed from the list on the home page and is ready to be read, corrected, and annotated.
 4. Make annotations to specific variants, correct or merge them, and add general notes to the document.
 5. Advanced users can edit the source code by calling up the HTML of a selection of paragraphs (with a maximum of 5 consecutive paragraphs).

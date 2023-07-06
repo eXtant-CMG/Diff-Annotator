@@ -101,6 +101,9 @@ if (preElementCount) {
 }
 let divElement = document.createElement('div');
 divElement.setAttribute('class', 'stats');
+let statsTitle = document.createElement('h4');
+statsTitle.textContent = 'STATS';
+divElement.appendChild(statsTitle);
 let totalDiv = document.createElement('div');
 totalDiv.setAttribute('class', 'total');
 totalDiv.textContent = `f1: ${f1WordCount} | f2: ${f2WordCount} | inv.: ${invariantWordCount } | f1+: ${f1WordCount + invariantWordCount} | f2+: ${f2WordCount + invariantWordCount} | f1 %: ${(f1WordCount / (invariantWordCount + f1WordCount) * 100).toFixed(2)}% | f2 - f1 = ${f2WordCount - f1WordCount} | f2+ is ${((f2WordCount - f1WordCount) / ((f1WordCount + invariantWordCount) / 100)).toFixed(1)}% longer than f1+`;
