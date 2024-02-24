@@ -1,6 +1,6 @@
 # Diff Annotator
 
-Diff Annotator is a lightweight environment for annotating text-comparisons of two plain text files. It makes use of Node.js, Python, and `git diff`. After running the text files through a pipeline of `git diff` (using a token-based comparison), [ansi2html.sh](https://github.com/pixelb/scripts/blob/master/scripts/ansi2html.sh), and a Python processing script, the Diff Annotator creates a HTML rendering that is ready to be read, corrected, and annotated, all in the front end.
+Diff Annotator is a lightweight environment for annotating text-comparisons of two plain text files. It makes use of Node.js, Python, and `git diff`. After running the text files through a pipeline of `git diff` (using a token-based comparison) and a Python processing script, the Diff Annotator creates a HTML rendering that is ready to be read, corrected, and annotated, all in the front end.
 
 ## Features
 - Upload two text files for comparison
@@ -15,12 +15,13 @@ Diff Annotator is a lightweight environment for annotating text-comparisons of t
 - [Python 3](https://www.python.org/downloads/)
 - [BeautifulSoup4](https://pypi.org/project/beautifulsoup4/) (`pip install beautifulsoup4`)
 - [lxml](https://pypi.org/project/lxml/) (`pip install lxml`)
+- [ansi2html](https://pypi.org/project/ansi2html/) (`pip install ansi2html`)
 - [Node.js](https://nodejs.dev/en/download/)
 
 ## Installation
 1. Install Git Diff from the link above.
 2. Install Python 3 from the link above.
-3. Install BeautifulSoup4 and lxml by running `pip install beautifulsoup4` and `pip install lxml`.
+3. Install BeautifulSoup4, lxml and ansi2html by running `pip install beautifulsoup4`, `pip install lxml` and `pip install ansi2html`.
 4. Install Node.js from the link above.
 5. From the root folder run the command `npm install` to install node modules
 5. Start the server with the command `npm start`

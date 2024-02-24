@@ -353,11 +353,11 @@ fetch('info.txt')
     sourcesSpan.innerHTML = 'Text files: <a href="file1.txt">file1.txt</a> <a href="file2.txt">file2.txt</a>'
     newDiv.appendChild(sourcesSpan);
 
-    // Get the first child of the body element
-    const firstChild = document.body.firstChild;
+    // Get the header element
+    const header = document.querySelector('header');
 
-    // Insert paddingDiv as the second child of the body element
-    document.body.insertBefore(paddingDiv, firstChild.nextSibling);
+    // Insert paddingDiv after the header
+    header.parentNode.insertBefore(paddingDiv, header.nextSibling);
 
     // Insert newDiv after paddingDiv
     document.body.insertBefore(newDiv, paddingDiv.nextSibling);
@@ -412,7 +412,6 @@ appSpans.forEach(span => {
 
 let currentId = null;
 
-if (combine !== 'yes') {
 appSpans.forEach(span => {
   span.addEventListener('click', () => {
     const id = span.id;
@@ -464,9 +463,6 @@ appSpans.forEach(span => {
         const newDeleteButton = deleteButton.cloneNode(true);
         deleteButton.parentNode.replaceChild(newDeleteButton, deleteButton);
         newDeleteButton.addEventListener('click', () => deleteFunction(currentId));
-
-        //deleteButton.addEventListener('click', () => deleteFunction(id));
-
 
 
         const input = modal.querySelector('input');
@@ -559,7 +555,7 @@ appSpans.forEach(span => {
       });
   });
 });
-}
+
 
 document.addEventListener('keydown', event => {
     if (event.key === 'Backspace' && event.target.tagName !== 'INPUT'  && event.target.tagName !== 'TEXTAREA') {

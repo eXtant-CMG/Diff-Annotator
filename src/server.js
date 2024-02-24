@@ -2,6 +2,7 @@
 const express = require('express');
 const { exec } = require('child_process');
 const { execSync } = require('child_process');
+const { spawnSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
@@ -216,13 +217,42 @@ app.post('/upload', upload.array('files', 2), (req, res) => {
   fs.copyFileSync(files[0].path, file1Path);
   fs.copyFileSync(files[1].path, file2Path);
 
+  let outputTxt = path.join(sceneDir, 'output.txt');
   let outputPath = path.join(sceneDir, 'output.html');
 
-  
-  execSync(`git diff --color-words --no-index ${file1Path} ${file2Path} | ${path.join(__dirname, 'scripts', 'ansi2html.sh')} > ${outputPath}`);
+  // try the git diff
+  try {
+    execSync(`git diff --color-words --no-index ${file1Path} ${file2Path} > ${outputTxt}`);
+  } catch (error) {
+    if (error.status === 1) {
+      console.log('Differences were found between the files.');
+    } else {
+      console.error('An error occurred:', error);
+    }
+  }
+
+  // Read the ANSI text from the output file
+  const ansiText = fs.readFileSync(outputTxt, 'utf-8');
+
+const pythonProcess = spawnSync('python', ['-c', `
+from ansi2html import Ansi2HTMLConverter
+conv = Ansi2HTMLConverter()
+ansi = """${ansiText}"""
+html = conv.convert(ansi)
+print(html)
+`], { stdio: 'pipe' });
+
+  // Get the HTML output from the Python script
+  const htmlOutput = pythonProcess.stdout.toString();
+
+  // Write the HTML output to the output file
+  fs.writeFileSync(outputPath, htmlOutput);
   
   // Added instruction to run ${outputPath} through the python/process-input.py script
   execSync(`python ${path.join(__dirname, 'scripts', 'process-input.py')} ${outputPath}`);
+
+  // Delete the outputTxt file
+  fs.unlinkSync(outputTxt);
 
   let infoPath = path.join(sceneDir, 'info.txt');
   let infoContent = `${diffName}\nuncorrected`;

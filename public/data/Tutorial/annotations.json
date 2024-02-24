@@ -13,6 +13,6 @@
     },
     {
         "app-id": "app-7328w91",
-        "text": "variants with annotation are marked with a <span style='color:red;'>red *</span>"
+        "text": "variants with annotation are marked with a <span style='color:red;'>red *</span>. Hover over it to see a popup with the annotation."
     }
 ]

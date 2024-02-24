@@ -7,6 +7,31 @@ import random
 def has_class(elem, class_name):
     return elem.tag == 'span' and 'class' in elem.attrib and class_name in elem.attrib['class']
 
+def preprocess_html(file_location):
+    with open(file_location, 'r') as f:
+        soup = BeautifulSoup(f.read(), 'html.parser')
+
+    # Replace <span class="ansi31"> with <span class="f1">
+    for span in soup.find_all('span', class_='ansi31'):
+        span['class'] = 'f1'
+
+    # Replace <span class="ansi32"> with <span class="f2">
+    for span in soup.find_all('span', class_='ansi32'):
+        span['class'] = 'f2'
+
+    # Remove <span class="ansi1"> and <span class="ansi36"> elements
+    for span in soup.find_all('span', class_=['ansi1', 'ansi36']):
+        span.decompose()
+
+    # Remove empty lines
+    html = str(soup).splitlines()
+    html = [line for line in html if line.strip() != '']
+    html = '\n'.join(html)
+
+    with open(file_location, 'w') as f:
+        f.write(html)
+
+
 def first_function(file_location):
     parser = etree.HTMLParser()
     tree = etree.parse(file_location, parser)
@@ -111,6 +136,7 @@ def fourth_function(file_location):
 
 if __name__ == '__main__':
     file_location = sys.argv[1]
+    preprocess_html(file_location)
     first_function(file_location)
     second_function(file_location)
     third_function(file_location)
