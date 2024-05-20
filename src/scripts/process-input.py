@@ -3,13 +3,26 @@ import sys
 from lxml import etree
 from bs4 import BeautifulSoup, NavigableString
 import random
+import re
+
+def ansi_to_html(ansi_text):
+    # Replace ANSI escape sequences with HTML tags
+    html_text = re.sub(r'\x1b\[31m', '<span class="ansi31">', ansi_text)
+    html_text = re.sub(r'\x1b\[32m', '<span class="ansi32">', html_text)
+    html_text = re.sub(r'\x1b\[1m', '<span class="ansi1">', html_text)
+    html_text = re.sub(r'\x1b\[36m', '<span class="ansi36">', html_text)
+    html_text = re.sub(r'\x1b\[m', '</span>', html_text)
+    
+    html_text = '<html><head></head><body><pre>' + html_text + '</pre></body></html>'
+
+    return html_text
 
 def has_class(elem, class_name):
     return elem.tag == 'span' and 'class' in elem.attrib and class_name in elem.attrib['class']
 
-def preprocess_html(file_location):
-    with open(file_location, 'r') as f:
-        soup = BeautifulSoup(f.read(), 'html.parser')
+def preprocess_html(html_text):
+    
+    soup = BeautifulSoup(html_text, 'html.parser')
 
     # Replace <span class="ansi31"> with <span class="f1">
     for span in soup.find_all('span', class_='ansi31'):
@@ -28,19 +41,17 @@ def preprocess_html(file_location):
     html = [line for line in html if line.strip() != '']
     html = '\n'.join(html)
 
-    with open(file_location, 'w') as f:
-        f.write(html)
+    return html
 
 
-def first_function(file_location):
+def first_function(html_text):
     parser = etree.HTMLParser()
-    tree = etree.parse(file_location, parser)
-    root = tree.getroot()
+    root = etree.fromstring(html_text, parser)
     for f1 in root.xpath('//span[contains(@class, "f1")]'):
         f2 = f1.getnext()
         while f2 is not None and f2.tag is etree.Comment:
             f2 = f2.getnext()
-        if f2 is not None and has_class(f2, 'f2') and (f1.tail is None or not f1.tail.strip()):
+        if f2 is not None and 'f2' in f2.get('class', '') and (f1.tail is None or not f1.tail.strip()):
             app = etree.Element('span')
             app.attrib['class'] = 'app'
             app.attrib['id'] = f'app-{id(app) % 10000}'
@@ -50,11 +61,10 @@ def first_function(file_location):
             if f2.tail is not None:
                 app.tail = f2.tail
                 f2.tail = None
-    tree.write(file_location, pretty_print=True)
+    return etree.tostring(root, pretty_print=True).decode()
 
-def second_function(file_location):
-    with open(file_location, 'r') as f:
-        soup = BeautifulSoup(f.read(), 'html.parser')
+def second_function(html_text):
+    soup = BeautifulSoup(html_text, 'html.parser')
 
     # Added instruction to replace the <style> element in the file
     style = soup.style
@@ -109,12 +119,10 @@ def second_function(file_location):
     soup.body.insert(0, header)
 
 
-    with open(file_location, 'w') as f:
-        f.write(str(soup))
+    return str(soup)
 
-def third_function(file_location):
-    with open(file_location, 'r') as f:
-        soup = BeautifulSoup(f.read(), 'html.parser')
+def third_function(html_text):
+    soup = BeautifulSoup(html_text, 'html.parser')
 
     app_spans = soup.find_all('span', class_='app')
     ids = [app_span.get('id') for app_span in app_spans]
@@ -124,20 +132,31 @@ def third_function(file_location):
             app_span['id'] = new_id
             ids.append(new_id)
 
-    with open(file_location, 'w') as f:
-        f.write(str(soup))
+    return str(soup)
 
-def fourth_function(file_location):
-    with open(file_location, 'r') as f:
-        text = f.read()
-    new_text = text.replace('\n</span></span>', '</span></span>\n')
-    with open(file_location, 'w') as f:
+def fourth_function(html_text, output_file):
+    new_text = html_text.replace('\n</span></span>', '</span></span>\n')
+    
+    # Save the result to disk
+    with open(output_file, 'w') as f:
         f.write(new_text)
+
 
 if __name__ == '__main__':
     file_location = sys.argv[1]
-    preprocess_html(file_location)
-    first_function(file_location)
-    second_function(file_location)
-    third_function(file_location)
-    fourth_function(file_location)
+    output_file = file_location.replace('output.txt', 'output.html')
+    
+    # Read the ANSI text from the file
+    with open(file_location, 'r') as file:
+        ansi_text = file.read()
+    
+    # Convert ANSI text to HTML
+    html_text = ansi_to_html(ansi_text)
+    
+    # Pass the HTML text to the other functions
+    html_text = preprocess_html(html_text)
+    html_text = first_function(html_text)
+    html_text = second_function(html_text)
+    html_text = third_function(html_text)
+    fourth_function(html_text, output_file)
+

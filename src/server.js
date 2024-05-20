@@ -64,7 +64,7 @@ app.get('*.jpeg', (req, res) => {
 app.get('/delete-app', (req, res) => {
   const dataId = req.query.dataId;
   const dirVar = req.query.dirVar;
-  exec(`python ${path.join(__dirname, 'scripts', 'delete-app.py')} ${dataId} ${dirVar}`, (error, stdout, stderr) => {
+  exec(`python3 ${path.join(__dirname, 'scripts', 'delete-app.py')} ${dataId} ${dirVar}`, (error, stdout, stderr) => {
     if (error) {
       console.error(`exec error: ${error}`);
       return;
@@ -81,7 +81,7 @@ app.get('/update-app', (req, res) => {
   const f2Text = req.query.f2Text;
   const dirVar = req.query.dirVar;
 
-  exec(`python ${path.join(__dirname, 'scripts', 'update-app.py')} ${id} "${f1Text.replace(/"/g, '\\"')}" "${f2Text.replace(/"/g, '\\"')}" ${dirVar}`, (error, stdout, stderr) => {
+  exec(`python3 ${path.join(__dirname, 'scripts', 'update-app.py')} ${id} "${f1Text.replace(/"/g, '\\"')}" "${f2Text.replace(/"/g, '\\"')}" ${dirVar}`, (error, stdout, stderr) => {
     if (error) {
       console.error(`exec error: ${error}`);
       return;
@@ -95,7 +95,7 @@ app.get('/update-app', (req, res) => {
 
 app.get('/search', (req, res) => {
   const searchString = req.query.searchString;
-  exec(`python ${path.join(__dirname, 'scripts', 'search.py')} "${searchString}"`, (error, stdout, stderr) => {
+  exec(`python3 ${path.join(__dirname, 'scripts', 'search.py')} "${searchString}"`, (error, stdout, stderr) => {
     if (error) {
       console.error(`exec error: ${error}`);
       return;
@@ -112,7 +112,7 @@ app.get('/make-annotation', (req, res) => {
   const annotationText = req.query.annotationText;
   const dataId = req.query.dataId;
   const dirVar = req.query.dirVar;
-  exec(`python ${path.join(__dirname, 'scripts', 'make-annotation.py')} "${annotationText.replace(/"/g, '\\"')}" ${dataId} ${dirVar}`, (error, stdout, stderr) => {
+  exec(`python3 ${path.join(__dirname, 'scripts', 'make-annotation.py')} "${annotationText.replace(/"/g, '\\"')}" ${dataId} ${dirVar}`, (error, stdout, stderr) => {
     if (error) {
       console.error(`exec error: ${error}`);
       return;
@@ -145,7 +145,7 @@ app.get('/api/diffs', (req, res) => {
 app.get('/edit-notes', (req, res) => {
   const textareaValue = req.query.textareaValue;
   const dirVar = req.query.dirVar;
-  exec(`python ${path.join(__dirname, 'scripts', 'edit-notes.py')} "${textareaValue.replace(/"/g, '\\"')}" ${dirVar}`, (error, stdout, stderr) => {
+  exec(`python3 ${path.join(__dirname, 'scripts', 'edit-notes.py')} "${textareaValue.replace(/"/g, '\\"')}" ${dirVar}`, (error, stdout, stderr) => {
     if (error) {
       console.error(`exec error: ${error}`);
       return;
@@ -161,7 +161,7 @@ app.get('/edit-source', (req, res) => {
   let paragraphArray = req.query.paragraphArray;
   paragraphArray = decodeURIComponent(paragraphArray).split(',').map(Number).join(',');
   let editedText = req.query.editedText.trimEnd();
-  exec(`python ${path.join(__dirname, 'scripts', 'edit-source.py')} "${paragraphArray}" ${dirVar} "${editedText.replace(/"/g, '\\"')}"`, (error, stdout, stderr) => {
+  exec(`python3 ${path.join(__dirname, 'scripts', 'edit-source.py')} "${paragraphArray}" ${dirVar} "${editedText.replace(/"/g, '\\"')}"`, (error, stdout, stderr) => {
     if (error) {
       console.error(`exec error: ${error}`);
       return;
@@ -231,25 +231,9 @@ app.post('/upload', upload.array('files', 2), (req, res) => {
     }
   }
 
-  // Read the ANSI text from the output file
-  const ansiText = fs.readFileSync(outputTxt, 'utf-8');
-
-const pythonProcess = spawnSync('python', ['-c', `
-from ansi2html import Ansi2HTMLConverter
-conv = Ansi2HTMLConverter()
-ansi = """${ansiText}"""
-html = conv.convert(ansi)
-print(html)
-`], { stdio: 'pipe' });
-
-  // Get the HTML output from the Python script
-  const htmlOutput = pythonProcess.stdout.toString();
-
-  // Write the HTML output to the output file
-  fs.writeFileSync(outputPath, htmlOutput);
   
   // Added instruction to run ${outputPath} through the python/process-input.py script
-  execSync(`python ${path.join(__dirname, 'scripts', 'process-input.py')} ${outputPath}`);
+  execSync(`python3 ${path.join(__dirname, 'scripts', 'process-input.py')} ${outputTxt}`);
 
   // Delete the outputTxt file
   fs.unlinkSync(outputTxt);
