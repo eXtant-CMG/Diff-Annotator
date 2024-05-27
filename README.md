@@ -32,3 +32,6 @@ Diff Annotator is a lightweight environment for annotating text-comparisons of t
 3. After processing, the text-comparison can be accessed from the list on the home page and is ready to be read, corrected, and annotated.
 4. Make annotations to specific variants, correct or merge them, and add general notes to the document.
 5. Advanced users can edit the source code by calling up the HTML of a selection of paragraphs (with a maximum of 5 consecutive paragraphs).
+
+## Acknowlegdments
+This application was created by Vincent Neyt as a tool to perform the comparative close readings necessary in the FWO funded research project “Creating Suspense Across Versions: Genetic Narratology and Stephen King’s IT” at the University of Antwerp (project code G007422N).
