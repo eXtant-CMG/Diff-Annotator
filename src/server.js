@@ -3,6 +3,7 @@ const express = require('express');
 const { exec } = require('child_process');
 const { execSync } = require('child_process');
 const { spawnSync } = require('child_process');
+const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
@@ -61,18 +62,65 @@ app.get('*.jpeg', (req, res) => {
 });
 
 
+// python detection helper function
+function detectPythonCommand() {
+  const python3Check = spawnSync('python3', ['--version'], { encoding: 'utf-8' });
+  if (!python3Check.error && python3Check.status === 0) {
+    console.log('Using python3');
+    return 'python3';
+  }
+
+  const pythonCheck = spawnSync('python', ['--version'], { encoding: 'utf-8' });
+  if (!pythonCheck.error && pythonCheck.status === 0) {
+    console.log('Using python');
+    return 'python';
+  }
+
+  throw new Error('Python is not installed or not available in the PATH.');
+}
+
+// Declare pythonCommand at the global scope
+let pythonCommand;
+
+try {
+  // Detect the appropriate Python command
+  pythonCommand = detectPythonCommand();
+  console.log(`Detected Python command: ${pythonCommand}`);
+} catch (error) {
+  console.error(error.message);
+  process.exit(1); // Exit the application with an error code
+}
+
+
+//Template for using Spawn
+
+function runScript(scriptPath, args, callback) {
+  const process = spawn(pythonCommand, [scriptPath, ...args]);
+
+  process.stdout.on('data', (data) => {
+    console.log(`stdout: ${data}`);
+  });
+
+  process.stderr.on('data', (data) => {
+    console.error(`stderr: ${data}`);
+  });
+
+  process.on('close', (code) => {
+    if (code !== 0) {
+      console.error(`Script exited with code ${code}`);
+    }
+    if (callback) callback(code);
+  });
+}
+
 app.get('/delete-app', (req, res) => {
   const dataId = req.query.dataId;
   const dirVar = req.query.dirVar;
-  exec(`python3 ${path.join(__dirname, 'scripts', 'delete-app.py')} ${dataId} ${dirVar}`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`exec error: ${error}`);
-      return;
-    }
-    console.log(`stdout: ${stdout}`);
-    console.error(`stderr: ${stderr}`);
+const scriptPath = path.join(__dirname, 'scripts', 'delete-app.py');
+  
+  runScript(scriptPath, [dataId, dirVar], () => {
+    res.send('Script executed');
   });
-  res.send('Script executed');
 });
 
 app.get('/update-app', (req, res) => {
@@ -80,48 +128,37 @@ app.get('/update-app', (req, res) => {
   const f1Text = req.query.f1Text;
   const f2Text = req.query.f2Text;
   const dirVar = req.query.dirVar;
+  const scriptPath = path.join(__dirname, 'scripts', 'update-app.py');
 
-  exec(`python3 ${path.join(__dirname, 'scripts', 'update-app.py')} ${id} "${f1Text.replace(/"/g, '\\"')}" "${f2Text.replace(/"/g, '\\"')}" ${dirVar}`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`exec error: ${error}`);
-      return;
-    }
-    console.log(`stdout: ${stdout}`);
-    console.error(`stderr: ${stderr}`);
+  runScript(scriptPath, [id, f1Text, f2Text, dirVar], () => {
+    res.send('Script executed');
   });
-  res.send('Script executed');
 });
 
 
 app.get('/search', (req, res) => {
   const searchString = req.query.searchString;
-  exec(`python3 ${path.join(__dirname, 'scripts', 'search.py')} "${searchString}"`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`exec error: ${error}`);
-      return;
-    }
-    console.log(`stdout: ${stdout}`);
-    console.error(`stderr: ${stderr}`);
+  const scriptPath = path.join(__dirname, 'scripts', 'search.py');
+
+  runScript(scriptPath, [searchString], () => {
+    setTimeout(() => {
+      res.redirect(path.resolve(__dirname, '..', 'public/search.html'));
+    }, 1500);
   });
-  setTimeout(() => {
-    res.redirect(path.resolve(__dirname, '..', 'public/search.html'));
-  }, 1500);
 });
 
 app.get('/make-annotation', (req, res) => {
-  const annotationText = req.query.annotationText;
+  const scriptPath = path.join(__dirname, 'scripts', 'make-annotation.py');
+  const annotationText = req.query.annotationText.replace(/"/g, '\\"'); // Escape quotes
   const dataId = req.query.dataId;
   const dirVar = req.query.dirVar;
-  exec(`python3 ${path.join(__dirname, 'scripts', 'make-annotation.py')} "${annotationText.replace(/"/g, '\\"')}" ${dataId} ${dirVar}`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`exec error: ${error}`);
-      return;
-    }
-    console.log(`stdout: ${stdout}`);
-    console.error(`stderr: ${stderr}`);
+
+  runScript(scriptPath, [annotationText, dataId, dirVar], () => {
+    res.send('Script executed');
   });
-  res.send('Script executed');
 });
+
+
 
 app.get('/api/diffs', (req, res) => {
   const scenesPath = path.resolve(__dirname, '..', 'public', 'data');
@@ -145,15 +182,11 @@ app.get('/api/diffs', (req, res) => {
 app.get('/edit-notes', (req, res) => {
   const textareaValue = req.query.textareaValue;
   const dirVar = req.query.dirVar;
-  exec(`python3 ${path.join(__dirname, 'scripts', 'edit-notes.py')} "${textareaValue.replace(/"/g, '\\"')}" ${dirVar}`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`exec error: ${error}`);
-      return;
-    }
-    console.log(`stdout: ${stdout}`);
-    console.error(`stderr: ${stderr}`);
+  const scriptPath = path.join(__dirname, 'scripts', 'edit-notes.py');
+
+  runScript(scriptPath, [textareaValue, dirVar], () => {
+    res.send('Script executed');
   });
-  res.send('Script executed');
 });
 
 app.get('/edit-source', (req, res) => {
@@ -161,15 +194,11 @@ app.get('/edit-source', (req, res) => {
   let paragraphArray = req.query.paragraphArray;
   paragraphArray = decodeURIComponent(paragraphArray).split(',').map(Number).join(',');
   let editedText = req.query.editedText.trimEnd();
-  exec(`python3 ${path.join(__dirname, 'scripts', 'edit-source.py')} "${paragraphArray}" ${dirVar} "${editedText.replace(/"/g, '\\"')}"`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`exec error: ${error}`);
-      return;
-    }
-    console.log(`stdout: ${stdout}`);
-    console.error(`stderr: ${stderr}`);
+  const scriptPath = path.join(__dirname, 'scripts', 'edit-source.py');
+
+  runScript(scriptPath, [paragraphArray, dirVar, editedText], () => {
+    res.send('Script executed');
   });
-  res.send('Script executed');
 });
 
 app.post('/upload', upload.array('files', 2), (req, res) => {
@@ -220,35 +249,102 @@ app.post('/upload', upload.array('files', 2), (req, res) => {
   let outputTxt = path.join(sceneDir, 'output.txt');
   let outputPath = path.join(sceneDir, 'output.html');
 
-  // try the git diff
-  try {
-    execSync(`git diff --color-words --no-index ${file1Path} ${file2Path} > ${outputTxt}`);
-  } catch (error) {
-    if (error.status === 1) {
-      console.log('Differences were found between the files.');
-    } else {
-      console.error('An error occurred:', error);
-    }
+try {
+  const gitDiffProcess = spawnSync('git', [
+    'diff',
+    '--color-words',
+    '--no-index',
+    file1Path,
+    file2Path
+  ], {
+    encoding: 'utf-8', // Ensure output is a readable string
+    stdio: ['ignore', 'pipe', 'pipe'] // Ignore stdin, pipe stdout and stderr
+  });
+
+  if (gitDiffProcess.error) {
+    console.error('Error running git diff:', gitDiffProcess.error);
+    throw gitDiffProcess.error;
   }
 
-  
-  // Added instruction to run ${outputPath} through the python/process-input.py script
-  execSync(`python3 ${path.join(__dirname, 'scripts', 'process-input.py')} ${outputTxt}`);
+  if (gitDiffProcess.status === 1) {
+    console.log('Differences were found between the files.');
+  } else if (gitDiffProcess.status !== 0) {
+    console.error(`git diff failed with status code: ${gitDiffProcess.status}`);
+    console.error('stderr:', gitDiffProcess.stderr);
+    throw new Error('git diff failed');
+  }
 
-  // Delete the outputTxt file
+  // Write the output to the file
+  fs.writeFileSync(outputTxt, gitDiffProcess.stdout);
+} catch (error) {
+  console.error('An error occurred during git diff execution:', error);
+  return res.status(500).send('An error occurred during git diff execution.');
+}
+
+
+try {
+  // Run the Python script using spawnSync
+  const outputTxtEscaped = outputTxt.replace(/ /g, '\\ ');
+  const processInputScript = path.join(__dirname, 'scripts', 'process-input.py');
+  const processInputScriptEscaped = processInputScript.replace(/ /g, '\\ ');
+  const pythonProcess = spawnSync(pythonCommand, [processInputScriptEscaped, outputTxtEscaped], {
+    shell: true,
+    stdio: 'inherit'
+  });
+
+  if (pythonProcess.error) {
+    console.error('Error running Python script:', pythonProcess.error);
+    throw pythonProcess.error;
+  }
+
+  if (pythonProcess.status !== 0) {
+    console.error(`Python script failed with status code: ${pythonProcess.status}`);
+    throw new Error('Python script failed');
+  }
+  console.log('process-input.py stdout:', pythonProcess.stdout);
+} catch (error) {
+  console.error('An error occurred during Python script execution:', error);
+  return res.status(500).send('An error occurred during Python script execution.');
+}
+
+
+// Delete the outputTxt file
+try {
   fs.unlinkSync(outputTxt);
+} catch (error) {
+  console.error('Failed to delete outputTxt file:', error);
+}
 
+// Ensure the directory exists
+try {
+  fs.mkdirSync(sceneDir, { recursive: true });
+} catch (error) {
+  console.error('Failed to create directory:', error);
+  return res.status(500).send('Failed to create necessary directories.');
+}
+
+// Write the info.txt file
+try {
   let infoPath = path.join(sceneDir, 'info.txt');
   let infoContent = `${diffName}\nuncorrected`;
   fs.writeFileSync(infoPath, infoContent);
+} catch (error) {
+  console.error('Failed to write info.txt:', error);
+  return res.status(500).send('Failed to write info.txt.');
+}
 
+// Write the annotations.json file
+try {
   let annotationsPath = path.join(sceneDir, 'annotations.json');
   fs.writeFileSync(annotationsPath, '[]');
+} catch (error) {
+  console.error('Failed to write annotations.json:', error);
+  return res.status(500).send('Failed to write annotations.json.');
+}
 
-  res.send(`<span class="notification">Diff <a href="${outputPath}">${diffName}</a> created.</span>`);
+// Send the response
+res.send(`<span class="notification">Diff <a href="${outputPath}">${diffName}</a> created.</span>`);
 });
-
-
 
 
 app.delete('/delete-diff/:diffNr', (req, res) => {

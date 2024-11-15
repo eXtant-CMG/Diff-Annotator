@@ -125,12 +125,20 @@ def third_function(html_text):
     soup = BeautifulSoup(html_text, 'html.parser')
 
     app_spans = soup.find_all('span', class_='app')
-    ids = [app_span.get('id') for app_span in app_spans]
+    ids = [app_span.get('id') for app_span in app_spans if app_span.get('id')]  # Only valid IDs
+
     for app_span in app_spans:
-        while ids.count(app_span.get('id')) > 1:
-            new_id = app_span.get('id') + random.choice('abcdefghijklmnopqrstuvwxyz') + str(random.randint(10, 99))
-            app_span['id'] = new_id
-            ids.append(new_id)
+        current_id = app_span.get('id')
+        if not current_id:  # Handle missing ID
+            new_id = f'z-{random.choice("abcdefghijklmnopqrstuvwxyz")}{random.randint(10, 99)}'
+        else:
+            new_id = current_id
+
+        # Ensure uniqueness
+        while ids.count(new_id) > 1 or new_id in ids:
+            new_id = f'z-{random.choice("abcdefghijklmnopqrstuvwxyz")}{random.randint(10, 99)}'
+        app_span['id'] = new_id
+        ids.append(new_id)
 
     return str(soup)
 

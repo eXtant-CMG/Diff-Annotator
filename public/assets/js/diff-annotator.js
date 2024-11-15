@@ -442,7 +442,7 @@ appSpans.forEach(span => {
             <button class="modal-button cancel">X</button>
             <br>
             <span style="color:rgb(0, 56, 40);font-weight:500;">Annotate:</span>
-            <input class="modal-text" type="text" value="${annotationText.replace(/"/g, '&quot;')}" style="width:440px;">
+            <input class="modal-text" type="text" value="${annotationText.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')}" style="width:440px;">
             <button style="font-size:1.1rem; background-color: rgb(234, 248, 246); color: rgb(0, 56, 40); padding: 7px; border-radius: 5px; border: 1px solid rgb(0, 56, 40);">Submit</button>
             <br/><br/>
             <span style="color:rgb(0, 56, 40);font-weight:500;">Modify:</span>
@@ -470,13 +470,14 @@ appSpans.forEach(span => {
         const submitButton = modal.querySelectorAll('button')[2];
 
         submitButton.addEventListener('click', () => {
-          let annotationText = input.value;
+          let annotationText = decodeHtmlEntities(input.value); // Decode entities
+          console.log("Annotation text being sent to the server:", annotationText); // Debug log
           fetch('info.txt')
             .then(response => response.text())
             .then(text => {
               const lines = text.split('\n');
               dirVar = lines[0];
-              fetch(`/make-annotation?annotationText=${encodeURIComponent(annotationText)}&dataId=${id}&dirVar=${dirVar}`)
+              fetch(`/make-annotation?annotationText=${annotationText}&dataId=${id}&dirVar=${dirVar}`)
                 .then(response => response.text())
                 .then(text => console.log(text));
             });
@@ -793,15 +794,18 @@ function updateAnnotations() {
           li.setAttribute('data-id', annotation['app-id']);
           li.style.cursor = 'pointer';
           
+          // Decode escaped characters in the annotation text
+          const decodedText = annotation.text.replace(/\\"/g, '"');
+
           // Get the line number of the corresponding <span class="app"> element
           let appElement = document.querySelector(`span.app#${annotation['app-id']}`);
           let lineNumber;
           if (appElement) {
             let preElementTextContent = appElement.closest('pre').textContent;
             lineNumber = preElementTextContent.slice(0, preElementTextContent.indexOf(appElement.textContent)).split('\n').length;
-            li.innerHTML = `<em>¶${lineNumber}</em> ${annotation.text}`;
+            li.innerHTML = `<em>¶${lineNumber}</em> ${decodedText}`;
           } else {
-            li.innerHTML = `${annotation.text}`;
+            li.innerHTML = `${decodedText}`;
           }
 
           let emElements = li.querySelectorAll('em');
@@ -852,7 +856,9 @@ function updateAnnotations() {
                   tooltip.style.border = '1px solid black';
                   tooltip.style.maxWidth = '400px';
                   tooltip.style.padding = '5px';
-                  tooltip.innerHTML = annotations.find(annotation => annotation['app-id'] === id).text;
+                  // Decode text before rendering in the tooltip
+                  const annotation = annotations.find(annotation => annotation['app-id'] === id);
+                  tooltip.innerHTML = annotation ? annotation.text.replace(/\\"/g, '"') : 'No annotation found';
 
                   // Apply the styling of bold to any <em> elements that might occur in the annotation.text
                   let emElements = tooltip.querySelectorAll('em');
@@ -936,5 +942,11 @@ window.addEventListener('hashchange', function() {
     window.scrollBy(0, -65);
   }
 });
+
+function decodeHtmlEntities(text) {
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = text;
+  return textarea.value;
+}
 
 
